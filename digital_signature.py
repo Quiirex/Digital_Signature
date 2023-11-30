@@ -34,7 +34,7 @@ class GUI:
         self.root = root
         root.title("Digital Signature")
 
-        print("Generating keys...")
+        print("Generating private and public keys...")
         start = time.time()
         self.signer = DigitalSigner()
         end = time.time()
