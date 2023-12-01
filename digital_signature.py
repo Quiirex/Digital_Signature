@@ -13,7 +13,7 @@ class DigitalSigner:
         with open(file_path, "rb") as f:
             data = f.read()
         hash = int(hashlib.sha256(data).hexdigest(), 16)
-        signature = rsa.encrypt(hash.to_bytes(32, "big"), self.private_key)
+        signature = rsa.encrypt(hash.to_bytes(32), self.private_key)
         return signature
 
     def verify_signature(self, file_path, signature):
@@ -21,9 +21,7 @@ class DigitalSigner:
             data = f.read()
         hash = int(hashlib.sha256(data).hexdigest(), 16)
         try:
-            decrypted_hash = int.from_bytes(
-                rsa.decrypt(signature, self.public_key), "big"
-            )
+            decrypted_hash = int.from_bytes(rsa.decrypt(signature, self.public_key))
             return hash == decrypted_hash
         except rsa.DecryptionError:
             return False
@@ -34,11 +32,11 @@ class GUI:
         self.root = root
         root.title("Digital Signature")
 
-        print("Generating private and public keys...")
+        print("Generating private and public key pair...")
         start = time.time()
         self.signer = DigitalSigner()
         end = time.time()
-        print(f"Keys generated. Took {round(end - start, 2)} seconds.")
+        print(f"Key pair generated. Took {round(end - start, 2)} seconds.")
 
         self.file_path = None
         self.signature = None
@@ -83,6 +81,17 @@ class GUI:
         )
         self.verification_text.grid(row=2, column=1)
 
+        tk.Label(
+            self.input_frame,
+            text="Output:",
+            width=15,
+            font=("Helvetica", 13, "bold"),
+            anchor="e",
+        ).grid(row=3, column=0, padx=10)
+        self.output_text = tk.Text(self.input_frame, width=60, height=11)
+        self.output_text.grid(row=3, column=1)
+        self.output_text.config(state=tk.DISABLED)
+
         self.button_frame = tk.Frame(root)
         self.button_frame.grid(row=1, column=0, padx=10, pady=10)
 
@@ -117,6 +126,7 @@ class GUI:
         if self.file_path:
             self.loaded_file_label.config(text=f'"{self.file_path.split("/")[-1]}"')
             self.status_text.config(text="Ready to sign.")
+            self.output_text.delete("1.0", tk.END)
             self.verification_text.config(text="Ready to verify.")
             self.sign_button["state"] = tk.NORMAL
         else:
@@ -128,6 +138,11 @@ class GUI:
             self.signature = self.signer.sign_file(self.file_path)
             self.verify_button["state"] = tk.NORMAL
             self.status_text.config(text="File signed.")
+            self.output_text.config(state=tk.NORMAL)
+            self.output_text.delete("1.0", tk.END)
+            self.output_text.insert(tk.END, "Signature digest:\n")
+            self.output_text.insert(tk.END, str(hex(int.from_bytes(self.signature))))
+            self.output_text.config(state=tk.DISABLED)
             print("File signed.")
         except Exception as e:
             self.status_text.config(text=f"Error: {e}")
