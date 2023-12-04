@@ -33,9 +33,9 @@ class GUI:
         root.title("Digital Signature")
 
         print("Generating private and public key pair...")
-        start = time.time()
+        start = time.perf_counter()
         self.signer = DigitalSigner()
-        end = time.time()
+        end = time.perf_counter()
         print(f"Key pair generated. Took {round(end - start, 2)} seconds.")
 
         self.file_path = None
@@ -144,6 +144,18 @@ class GUI:
             self.output_text.insert(tk.END, str(hex(int.from_bytes(self.signature))))
             self.output_text.config(state=tk.DISABLED)
             print("File signed.")
+        except rsa.DecryptionError as e:
+            self.status_text.config(text=f"Decryption Error: {e}")
+            print(f"Decryption Error: {e}")
+        except rsa.EncryptionError as e:
+            self.status_text.config(text=f"Encryption Error: {e}")
+            print(f"Encryption Error: {e}")
+        except FileNotFoundError as e:
+            self.status_text.config(text=f"File Not Found Error: {e}")
+            print(f"File Not Found Error: {e}")
+        except PermissionError as e:
+            self.status_text.config(text=f"Permission Error: {e}")
+            print(f"Permission Error: {e}")
         except Exception as e:
             self.status_text.config(text=f"Error: {e}")
             print(f"Error: {e}")
@@ -157,6 +169,18 @@ class GUI:
             else:
                 self.verification_text.config(text="Signature invalid.")
                 print("Signature invalid.")
+        except rsa.DecryptionError as e:
+            self.verification_text.config(text=f"Decryption Error: {e}")
+            print(f"Decryption Error: {e}")
+        except rsa.EncryptionError as e:
+            self.verification_text.config(text=f"Encryption Error: {e}")
+            print(f"Encryption Error: {e}")
+        except FileNotFoundError as e:
+            self.verification_text.config(text=f"File Not Found Error: {e}")
+            print(f"File Not Found Error: {e}")
+        except PermissionError as e:
+            self.verification_text.config(text=f"Permission Error: {e}")
+            print(f"Permission Error: {e}")
         except Exception as e:
             self.verification_text.config(text=f"Error: {e}")
             print(f"Error: {e}")
