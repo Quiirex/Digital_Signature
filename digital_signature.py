@@ -7,23 +7,32 @@ import rsa
 
 class DigitalSigner:
     def __init__(self):
-        self.private_key, self.public_key = rsa.newkeys(2048)
+        self.public_key, self.private_key = rsa.newkeys(2048)
 
     def sign_file(self, file_path):
         with open(file_path, "rb") as f:
             data = f.read()
-        hash = int(hashlib.sha256(data).hexdigest(), 16)
-        signature = rsa.encrypt(hash.to_bytes(32), self.private_key)
+
+        # Izračun hasha datoteke
+        file_hash = hashlib.sha256(data).digest()
+
+        # Podpis hasha z zasebnim ključem
+        signature = rsa.sign(file_hash, self.private_key, "SHA-256")
+
         return signature
 
     def verify_signature(self, file_path, signature):
         with open(file_path, "rb") as f:
             data = f.read()
-        hash = int(hashlib.sha256(data).hexdigest(), 16)
+
+        # Izračun hasha datoteke
+        file_hash = hashlib.sha256(data).digest()
+
         try:
-            decrypted_hash = int.from_bytes(rsa.decrypt(signature, self.public_key))
-            return hash == decrypted_hash
-        except rsa.DecryptionError:
+            # Preverjanje podpisa z javnim ključem
+            rsa.verify(file_hash, signature, self.public_key)
+            return True
+        except rsa.VerificationError:
             return False
 
 
