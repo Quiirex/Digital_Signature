@@ -13,11 +13,8 @@ class DigitalSigner:
         with open(file_path, "rb") as f:
             data = f.read()
 
-        # Izračun hasha datoteke
-        file_hash = hashlib.sha256(data).digest()
-
-        # Podpis hasha z zasebnim ključem
-        signature = rsa.sign(file_hash, self.private_key, "SHA-256")
+        # Podpis podatkov z zasebnim ključem
+        signature = rsa.sign(data, self.private_key, "SHA-256")
 
         return signature
 
@@ -25,12 +22,9 @@ class DigitalSigner:
         with open(file_path, "rb") as f:
             data = f.read()
 
-        # Izračun hasha datoteke
-        file_hash = hashlib.sha256(data).digest()
-
         try:
             # Preverjanje podpisa z javnim ključem
-            rsa.verify(file_hash, signature, self.public_key)
+            rsa.verify(data, signature, self.public_key)
             return True
         except rsa.VerificationError:
             return False
