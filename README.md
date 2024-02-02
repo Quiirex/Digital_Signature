@@ -1,6 +1,6 @@
 # Digital Signature
 
-A python + tkinter implementation for digitally signing files.
+A python + tkinter implementation of digitally signing files.
 
 ## The background
 
